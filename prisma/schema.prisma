@@ -1,0 +1,59 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model Catalogue {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  description String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  models Model[]
+}
+
+model Model {
+  id        String @id @default(cuid())
+  modelId   String
+  name      String
+  developer String
+
+  description String?
+
+  parameters    String?
+  contextLength Int?
+  license       String?
+  modality      String?
+  modelType     String?
+
+  huggingfaceUrl    String?
+  githubUrl         String?
+  documentationUrl String?
+
+  catalogueId String
+  catalogue   Catalogue @relation(fields: [catalogueId], references: [id], onDelete: Cascade)
+
+  benchmarks ModelBenchmark[]
+
+  createdAt DateTime @default(now())
+
+  @@unique([catalogueId, modelId])
+  @@index([catalogueId])
+}
+
+model ModelBenchmark {
+  id        String @id @default(cuid())
+  benchmark String
+  score     Float
+
+  modelId String
+  model   Model @relation(fields: [modelId], references: [id], onDelete: Cascade)
+
+  @@index([modelId])
+}
